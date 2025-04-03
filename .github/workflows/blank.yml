@@ -1,0 +1,62 @@
+name: CI/CD user service
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up AWS CLI
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 3: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 4: Log in to Amazon ECR
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Step 5: Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker build --build-arg JDBC_USER=${{ secrets.JDBCUSER }} --build-arg JDBC_PASSWORD=${{ secrets.JDBCPASS }} -t ${{ secrets.AWS_ECR_REPO_URI }}:latest .
+
+      # Step 6: Push the Docker image to Amazon ECR
+      - name: Push Docker image to Amazon ECR
+        run: |
+          docker push ${{ secrets.AWS_ECR_REPO_URI }}:latest
+
+      # Step 7: Set up kubectl for EKS
+      # - name: Set up kubectl
+      #   uses: aws-actions/eks-kubeconfig-action@v1
+      #   with:
+      #     cluster-name: ${{ secrets.EKS_CLUSTER_NAME }}
+      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+      #     region: ${{ secrets.AWS_REGION }}
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+
+      # Step 8: Apply Kubernetes resources (Deployment and Service)
+      - name: Deploy app to EKS
+        run: |
+          kubectl apply -f ${{ github.workspace }}/k8/checkout-service.yaml
