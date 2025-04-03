@@ -39,7 +39,7 @@ public class CartService {
         List<Map<String, Object>> enrichedCartItems = new ArrayList<>();
 
         for (CartItem item : cartItems) {
-            String productUrl = "http://product-service.default.svc.cluster.local/products/" + item.getProductId();
+            String productUrl = "http://product-service.default.svc.cluster.local:9091/products/" + item.getProductId();
             Map<String, Object> result = new LinkedHashMap<>();
             try {
                 // Make REST call
