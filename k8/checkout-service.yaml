@@ -17,7 +17,7 @@ spec:
         - name: checkout-service
           image: 039612866426.dkr.ecr.ap-south-1.amazonaws.com/checkoutsvc:latest
           ports:
-            - containerPort: 9092
+            - containerPort: 9094
           env:
             - name: JDBC_USER
               valueFrom:
@@ -68,4 +68,4 @@ spec:
         - destination:
             host: checkout-service.default.svc.cluster.local
             port:
-              number: 9092
+              number: 9094
