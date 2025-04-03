@@ -1,4 +1,4 @@
-name: CI/CD user service
+name: CI/CD checkout service
 
 # Controls when the workflow will run
 on:
