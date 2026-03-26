@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: checkout-service
-          image: 039612866426.dkr.ecr.ap-south-1.amazonaws.com/checkoutsvc:latest
+          image: 978430483281.dkr.ecr.ap-south-1.amazonaws.com/checkoutsvc:latest
           ports:
             - containerPort: 9094
           env:
